@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://cxd1g14iw0ege"]
+
+[ext_resource type="Script" uid="uid://b67wfv7thqc65" path="res://scripts/md_block.gd" id="1"]
+[ext_resource type="FontFile" uid="uid://hwkmpx6fgc6p" path="res://fonts/OpenSans/OpenSans-Regular.ttf" id="2_jfxms"]
+[ext_resource type="FontFile" uid="uid://tkpq7dcg3e4a" path="res://fonts/FiraCode/FiraCode-Regular.ttf" id="3_jfxms"]
+[ext_resource type="FontFile" uid="uid://cpiwhtndleuqj" path="res://fonts/OpenSans/OpenSans-Italic.ttf" id="4_07fmy"]
+[ext_resource type="FontFile" uid="uid://jebemam0u04p" path="res://fonts/OpenSans/OpenSans-BoldItalic.ttf" id="5_55ev7"]
+[ext_resource type="FontFile" uid="uid://c0kmlvihfw0g2" path="res://fonts/OpenSans/OpenSans-Bold.ttf" id="6_0efyd"]
+[ext_resource type="Texture2D" uid="uid://bnyvlt8piitwx" path="res://images/edit_16dp_999_FILL0_wght400_GRAD0_opsz20.svg" id="7_jfxms"]
+
+[node name="MdBlock" type="VBoxContainer" unique_id=620046437]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+script = ExtResource("1")
+
+[node name="TextEdit" type="TextEdit" parent="." unique_id=1628808881]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_jfxms")
+theme_override_font_sizes/font_size = 13
+wrap_mode = 1
+scroll_fit_content_height = true
+caret_blink = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." unique_id=1949942542]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+theme_override_colors/default_color = Color(0.6627451, 0.6745098, 0.6784314, 1)
+theme_override_colors/selection_color = Color(0, 0, 0, 0.8)
+theme_override_colors/table_even_row_bg = Color(0, 0, 0, 0.20784314)
+theme_override_constants/line_separation = 9
+theme_override_constants/text_highlight_v_padding = 3
+theme_override_fonts/normal_font = ExtResource("2_jfxms")
+theme_override_fonts/bold_font = ExtResource("6_0efyd")
+theme_override_fonts/bold_italics_font = ExtResource("5_55ev7")
+theme_override_fonts/italics_font = ExtResource("4_07fmy")
+theme_override_fonts/mono_font = ExtResource("3_jfxms")
+theme_override_font_sizes/normal_font_size = 13
+theme_override_font_sizes/bold_font_size = 13
+theme_override_font_sizes/bold_italics_font_size = 13
+theme_override_font_sizes/italics_font_size = 13
+theme_override_font_sizes/mono_font_size = 13
+bbcode_enabled = true
+text = "[hr height=1]
+"
+fit_content = true
+autowrap_mode = 2
+context_menu_enabled = true
+vertical_alignment = 1
+selection_enabled = true
+visible_characters_behavior = 3
+
+[node name="EditButton" type="TextureButton" parent="RichTextLabel" unique_id=811651789]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -40.0
+offset_right = -12.0
+offset_bottom = 28.0
+grow_horizontal = 0
+mouse_filter = 1
+texture_normal = ExtResource("7_jfxms")
+texture_pressed = ExtResource("7_jfxms")
+texture_hover = ExtResource("7_jfxms")
+texture_disabled = ExtResource("7_jfxms")
+texture_focused = ExtResource("7_jfxms")
+ignore_texture_size = true

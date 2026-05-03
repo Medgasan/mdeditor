@@ -1,0 +1,39 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
+[application]
+
+config/name="MdBlockEditor"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.6", "Forward Plus")
+boot_splash/image="uid://bpfemxpo1fbmj"
+
+[autoload]
+
+Status="*res://globals/status.gd"
+Events="*res://globals/events.gd"
+Global="*uid://r1568qk4thx0"
+
+[display]
+
+window/size/viewport_width=900
+window/size/viewport_height=700
+
+[editor]
+
+run/main_run_args="\"C:\\Users\\franm\\Desktop\\ComandosComunesGit.md\""
+
+[gui]
+
+theme/default_font_multichannel_signed_distance_field=true
