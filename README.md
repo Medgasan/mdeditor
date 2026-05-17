@@ -1,205 +1,72 @@
 # MdBlockEditor
 
-A lightweight Markdown editor and viewer built with **Godot 4.6**.  
-Opens, edits, and renders `.md` files with live WYSIWYG preview powered by Godot's `RichTextLabel` BBCode layer.
-
----
-
-## Features
-
-### Editor
-- **Block-based editing** — each paragraph is an independent node; `Enter` splits, `Backspace` at start merges blocks.
-- **Live WYSIWYG rendering** — Markdown is converted to BBCode on every keystroke; no manual preview toggle needed.
-- **Full CommonMark + GFM support**: headings (H1–H6), bold, italic, strikethrough, inline code, links, images, blockquotes, ordered/unordered lists, task lists (checkboxes), GFM tables, horizontal rules, footnotes, and a subset of HTML inline tags (`<kbd>`, `<mark>`, `<sup>`, `<sub>`, `<ins>`, `<del>`).
-
-### Multi-document workflow
-- **Tabbed interface** — open multiple files simultaneously.
-- **Drag & drop** — drop one or more `.md` files onto the window to open them.
-- **CLI argument** — pass a file path as the last argument to open it on launch.
-- **Unsaved-changes guard** — asterisk (`*`) in the tab title and a save button appear when a document has pending changes; closing a modified document prompts to save.
-
-### Window
-- **Always on top** toggle — keep the editor floating above other applications.
-- **Auto-hiding footer** — the status/save bar fades in when the cursor approaches the bottom edge.
-- **Toast notifications** — non-intrusive feedback for load/save events.
-
----
-
-## Requirements
-
-| Dependency | Version |
-| :--------- | :------ |
-| Godot      | 4.6     |
-
-No external libraries or plugins are required.
-
----
-
-## Getting Started
-
-### Run from the Godot editor
-
-1. Clone or download this repository.
-2. Open Godot 4.6 and import the project (`project.godot`).
-3. Press **F5** (or the ▶ button) to run.
-
-### Open a file
-
-Three ways to load a Markdown file:
-
-```
-# Via CLI
-godot --path /path/to/project -- /path/to/file.md
-
-# Via drag & drop
-Drop any .md file onto the application window.
-
-# Via tab
-If no file is provided, the editor starts with an empty tab ready to type.
-```
-
-### Save
-
-- Press the **save icon** (bottom bar) or trigger it from the unsaved-changes dialog when closing a tab.
-- The document is saved in-place (overwrites the original file).
-
----
-
-## Supported Markdown Syntax
-
-| Element | Syntax |
-| :------ | :----- |
-| Headings | `# H1` … `###### H6` |
-| Bold | `**text**` or `__text__` |
-| Italic | `*text*` or `_text_` |
-| Bold + Italic | `***text***` |
-| Strikethrough | `~~text~~` |
-| Inline code | `` `code` `` |
-| Fenced code block | ` ```lang … ``` ` |
-| Blockquote | `> text` |
-| Unordered list | `- item` |
-| Ordered list | `1. item`, `a. item`, `i. item` |
-| Task list | `- [ ] todo` / `- [x] done` |
-| GFM table | `\| col \| col \|` with separator row |
-| Horizontal rule | `---` or `***` |
-| Link | `[label](url)` |
-| Image | `![alt](url)` or `![alt](url){WxH}` |
-| Footnote | `[^1]` / `[^1]: text` |
-| Highlight | `<mark>text</mark>` |
-| Keyboard key | `<kbd>K</kbd>` |
-
----
-
-## Project Structure
-
-```
-/
-├── project.godot              # Godot project configuration
-├── main.tscn                  # Root scene (window, tab container, footer)
-├── md_document.tscn           # Per-document scene (scroll + editor)
-├── md_block.tscn              # Individual paragraph block
-├── empty_mensaje.tscn         # Placeholder shown when no file is open
-├── scripts/
-│   ├── main.gd                # Window management, tab lifecycle, drag & drop
-│   ├── md_document.gd         # Document load/save, tab state
-│   ├── md_editor.gd           # Block orchestration, split/merge logic
-│   ├── md_block.gd            # Single block editing and rendering
-│   └── md_to_bbcode.gd        # Markdown → BBCode parser
-├── globals/
-│   ├── events.gd              # Global signal bus
-│   ├── global.gd              # Shared utilities (dialogs, toasts, file save)
-│   └── status.gd              # Application status node
-└── fonts/
-    ├── Inter/                 # UI font (Regular, Bold, Italic, BoldItalic)
-    ├── OpenSans/              # Alternative UI font
-    └── FiraCode/              # Monospace font for code blocks
-```
-
----
-
-## Architecture
-
-The editor follows a **block-based document model**:
-
-```
-MDDocument (ScrollContainer)
-  └── MdEditor (VBoxContainer)
-        ├── MdBlock  ← paragraph / heading / list / code block
-        ├── MdBlock
-        └── ...
-```
-
-Each `MdBlock` holds the raw Markdown source for one logical block (separated by blank lines). On every edit, `md_to_bbcode.gd` converts the block's Markdown to BBCode, which `RichTextLabel` renders natively.
-
-**Signal flow for split/merge:**
-
-```
-User presses Enter at block boundary
-  → MdBlock emits split_requested
-    → MdEditor inserts new MdBlock at next index
-      → focus transfers to the new block
-```
-
----
-
-## Known Limitations
-
-- `<sup>` / `<sub>` render at a smaller font size but without vertical offset (requires a custom `RichTextEffect`).
-- Nested blockquotes and syntax highlighting in code blocks are not yet implemented.
-- Save always overwrites the original file; there is no Save As dialog.
-- The parser operates on the full Markdown source on every keystroke; very large documents may introduce noticeable latency.
-
----
-
-## Roadmap
-
-| Phase | Feature | Status |
-| :---: | :------ | :----: |
-| 1 | Inline parser (bold, italic, code, links) | ✅ |
-| 2 | Block-based editor + split/merge | ✅ |
-| 3 | Multi-tab + drag & drop | ✅ |
-| 4 | GFM tables | ✅ |
-| 5 | Footnotes | ✅ |
-| 6 | Toolbar with formatting buttons | 🔄 In progress |
-| 7 | `RichTextEffect` for sup/sub and blockquote bar | ⏳ Planned |
-| 8 | Syntax highlighting in code blocks | ⏳ Planned |
-| 9 | Save As / export | ⏳ Planned |
-| 10 | IME support (CJK / Arabic) | ⏳ Planned |
-
----
-
-## License
-
-_No license has been specified. All rights reserved by default until one is added._
-
-
----
----
-
-# MdBlockEditor
-
-Editor y visor de Markdown ligero construido con **Godot 4.6**.  
-Abre, edita y renderiza ficheros `.md` con previsualización WYSIWYG en tiempo real usando la capa BBCode de `RichTextLabel`.
+Editor y visor de Markdown construido con **Godot 4.6**.  
+Cada párrafo se edita y renderiza de forma independiente: en reposo muestra la vista previa WYSIWYG; al editarlo, muestra un `TextEdit` en bruto. El cambio entre modos es automático.
 
 ---
 
 ## Características
 
-### Editor
-- **Edición por bloques** — cada párrafo es un nodo independiente; `Enter` divide el bloque, `Backspace` al inicio lo fusiona con el anterior.
-- **Renderizado WYSIWYG en tiempo real** — el Markdown se convierte a BBCode en cada pulsación; sin necesidad de alternar entre modo edición y vista previa.
-- **Soporte completo CommonMark + GFM**: encabezados (H1–H6), negrita, cursiva, tachado, código inline, enlaces, imágenes, citas, listas ordenadas/no ordenadas, listas de tareas (checkboxes), tablas GFM, separadores horizontales, notas al pie y un subconjunto de etiquetas HTML inline (`<kbd>`, `<mark>`, `<sup>`, `<sub>`, `<ins>`, `<del>`).
+### Edición por bloques
+Cada bloque lógico (separado por línea en blanco) es un nodo independiente con dos modos:
+
+- **Vista previa** — `RichTextLabel` renderiza el BBCode generado a partir del Markdown.
+- **Modo edición** — `TextEdit` con el Markdown en bruto. Se activa al hacer clic en el botón de edición (aparece al pasar el ratón) o navegando con el teclado. Al perder el foco vuelve automáticamente a vista previa.
+
+### Teclado
+| Acción | Atajo |
+| :----- | :---- |
+| Dividir bloque en dos | `Shift + Enter` |
+| Fusionar con el bloque anterior | `Backspace` al inicio del bloque |
+| Moverse al bloque anterior | `↑` en la primera línea |
+| Moverse al bloque siguiente | `↓` en la última línea |
+
+### Selección y portapapeles
+Al soltar el botón del ratón sobre texto seleccionado en la vista previa, el texto se copia automáticamente al portapapeles con confirmación toast.
 
 ### Flujo multidocumento
-- **Interfaz con pestañas** — abre varios ficheros simultáneamente.
-- **Arrastrar y soltar** — arrastra uno o más ficheros `.md` sobre la ventana para abrirlos.
-- **Argumento de línea de comandos** — pasa una ruta como último argumento para abrir el fichero al arrancar.
-- **Protección contra cambios no guardados** — un asterisco (`*`) en el título de la pestaña y un botón de guardado aparecen cuando hay cambios pendientes; cerrar un documento modificado pregunta si guardar.
+- **Pestañas** — múltiples ficheros abiertos simultáneamente.
+- **Arrastrar y soltar** — arrastra uno o más `.md` sobre la ventana.
+- **Línea de comandos** — pasa la ruta del fichero como último argumento al ejecutar.
+- **Protección de cambios** — asterisco en el título de pestaña y botón de guardado al haber cambios pendientes; cerrar una pestaña modificada pregunta si guardar.
 
 ### Ventana
-- **Siempre encima** — mantén el editor flotando sobre otras aplicaciones.
-- **Barra inferior ocultable automáticamente** — la barra de estado/guardado aparece al acercar el cursor al borde inferior.
-- **Notificaciones toast** — confirmaciones no intrusivas para eventos de carga y guardado.
+- **Siempre encima** — checkbox en la barra inferior para mantener la ventana flotante.
+- **Barra inferior auto-ocultable** — aparece al acercar el cursor al borde inferior.
+- **Notificaciones toast** — feedback no intrusivo para carga, guardado y portapapeles.
+
+---
+
+## Sintaxis Markdown soportada
+
+### Bloques
+
+| Elemento | Sintaxis |
+| :------- | :------- |
+| Encabezado H1 | `# texto` |
+| Encabezado H2 | `## texto` |
+| Encabezado H3 | `### texto` |
+| Encabezado H4 | `#### texto` |
+| Cita | `> texto` |
+| Separador horizontal | `---` |
+| Bloque de código | ` ```lang … ``` ` |
+| Lista no ordenada | `- item` o `* item` |
+| Lista ordenada | `1. item` |
+| Lista de tareas | `- [ ] pendiente` / `- [x] hecho` |
+| Tabla GFM | `\| col \| col \|` con fila separadora |
+| Listas anidadas | Indentación con espacios o tabuladores |
+
+> Los encabezados H1–H4 incluyen una línea separadora debajo.
+
+### Inline
+
+| Elemento | Sintaxis |
+| :------- | :------- |
+| Negrita | `**texto**` |
+| Cursiva | `*texto*` |
+| Tachado | `~~texto~~` |
+| Código inline | `` `código` `` |
+| Enlace | `[etiqueta](url)` |
 
 ---
 
@@ -209,62 +76,34 @@ Abre, edita y renderiza ficheros `.md` con previsualización WYSIWYG en tiempo r
 | :---------- | :------ |
 | Godot       | 4.6     |
 
-No se requieren librerías externas ni plugins.
+Sin librerías externas ni plugins.
 
 ---
 
 ## Primeros pasos
 
-### Ejecutar desde el editor de Godot
+### Desde el editor de Godot
 
-1. Clona o descarga este repositorio.
-2. Abre Godot 4.6 e importa el proyecto (`project.godot`).
-3. Pulsa **F5** (o el botón ▶) para ejecutar.
+1. Clona o descarga el repositorio.
+2. Abre Godot 4.6 e importa `project.godot`.
+3. Pulsa **F5** para ejecutar.
 
 ### Abrir un fichero
 
-Tres formas de cargar un fichero Markdown:
-
-```
-# Por línea de comandos
+```bash
+# Por argumento de línea de comandos
 godot --path /ruta/al/proyecto -- /ruta/al/fichero.md
 
 # Por arrastrar y soltar
-Arrastra cualquier fichero .md sobre la ventana de la aplicación.
+Arrastra cualquier fichero .md sobre la ventana.
 
 # Sin fichero
-Si no se proporciona ninguno, el editor arranca con una pestaña vacía lista para escribir.
+El editor arranca con una pestaña vacía lista para escribir.
 ```
 
 ### Guardar
 
-- Pulsa el **icono de guardado** (barra inferior) o responde al diálogo que aparece al cerrar una pestaña con cambios pendientes.
-- El documento se guarda en su ubicación original (sobreescribe el fichero).
-
----
-
-## Sintaxis Markdown soportada
-
-| Elemento | Sintaxis |
-| :------- | :------- |
-| Encabezados | `# H1` … `###### H6` |
-| Negrita | `**texto**` o `__texto__` |
-| Cursiva | `*texto*` o `_texto_` |
-| Negrita + Cursiva | `***texto***` |
-| Tachado | `~~texto~~` |
-| Código inline | `` `código` `` |
-| Bloque de código | ` ```lang … ``` ` |
-| Cita | `> texto` |
-| Lista no ordenada | `- elemento` |
-| Lista ordenada | `1. elemento`, `a. elemento`, `i. elemento` |
-| Lista de tareas | `- [ ] pendiente` / `- [x] hecho` |
-| Tabla GFM | `\| col \| col \|` con fila separadora |
-| Separador horizontal | `---` o `***` |
-| Enlace | `[etiqueta](url)` |
-| Imagen | `![alt](url)` o `![alt](url){AxH}` |
-| Nota al pie | `[^1]` / `[^1]: texto` |
-| Resaltado | `<mark>texto</mark>` |
-| Tecla de teclado | `<kbd>K</kbd>` |
+El documento se guarda en su ruta original (sobreescribe el fichero). Se puede guardar desde el botón de la barra inferior o desde el diálogo al cerrar una pestaña con cambios pendientes.
 
 ---
 
@@ -272,80 +111,71 @@ Si no se proporciona ninguno, el editor arranca con una pestaña vacía lista pa
 
 ```
 /
-├── project.godot              # Configuración del proyecto Godot
-├── main.tscn                  # Escena raíz (ventana, pestañas, pie de página)
-├── md_document.tscn           # Escena por documento (scroll + editor)
-├── md_block.tscn              # Bloque individual de párrafo
-├── empty_mensaje.tscn         # Pantalla vacía cuando no hay fichero abierto
+├── project.godot              # Configuración del proyecto
+├── main.tscn                  # Escena raíz: ventana, pestañas, barra inferior
+├── md_document.tscn           # Escena por documento: scroll + editor
+├── md_block.tscn              # Bloque individual: TextEdit + RichTextLabel
+├── empty_mensaje.tscn         # Pantalla de bienvenida sin fichero abierto
 ├── scripts/
-│   ├── main.gd                # Gestión de ventana, ciclo de pestañas, drag & drop
-│   ├── md_document.gd         # Carga/guardado de documentos, estado de pestaña
-│   ├── md_editor.gd           # Orquestación de bloques, lógica de división/fusión
-│   ├── md_block.gd            # Edición y renderizado de un bloque individual
-│   └── md_to_bbcode.gd        # Parser Markdown → BBCode
+│   ├── main.gd                # Ventana, pestañas, drag & drop, CLI
+│   ├── md_document.gd         # Carga/guardado, título, estado de cambios
+│   ├── md_editor.gd           # Orquestación de bloques, split/merge
+│   ├── md_block.gd            # Modo edición/previa, eventos de teclado
+│   └── md_to_bbcode.gd        # Parser Markdown → BBCode (clase estática)
 ├── globals/
 │   ├── events.gd              # Bus de señales global
-│   ├── global.gd              # Utilidades compartidas (diálogos, toasts, guardado)
+│   ├── global.gd              # Diálogos, toasts, guardado de fichero
 │   └── status.gd              # Nodo de estado de la aplicación
 └── fonts/
-    ├── Inter/                 # Fuente de interfaz (Regular, Bold, Italic, BoldItalic)
-    ├── OpenSans/              # Fuente de interfaz alternativa
-    └── FiraCode/              # Fuente monoespaciada para bloques de código
+    ├── Inter/                 # Fuente de interfaz
+    ├── OpenSans/              # Fuente alternativa de interfaz
+    └── FiraCode/              # Fuente monoespaciada para código
 ```
 
 ---
 
 ## Arquitectura
 
-El editor sigue un **modelo de documento basado en bloques**:
-
 ```
-MDDocument (ScrollContainer)
-  └── MdEditor (VBoxContainer)
-        ├── MdBlock  ← párrafo / encabezado / lista / bloque de código
-        ├── MdBlock
+MDDocument  (ScrollContainer)
+  └── MdEditor  (VBoxContainer)
+        ├── MdBlock           ← bloque 1
+        │     ├── TextEdit    ← edición en Markdown bruto
+        │     └── RichTextLabel ← vista previa BBCode
+        ├── MdBlock           ← bloque 2
         └── ...
 ```
 
-Cada `MdBlock` almacena el Markdown en bruto de un bloque lógico (separados por líneas en blanco). En cada edición, `md_to_bbcode.gd` convierte el Markdown del bloque a BBCode, que `RichTextLabel` renderiza de forma nativa.
-
-**Flujo de señales para división/fusión:**
+**Flujo de señales entre bloques:**
 
 ```
-El usuario pulsa Enter al final de un bloque
-  → MdBlock emite split_requested
-    → MdEditor inserta un nuevo MdBlock en la posición siguiente
-      → el foco se transfiere al nuevo bloque
+Shift+Enter en MdBlock N
+  → emite split_requested(antes, después)
+    → MdEditor crea MdBlock N+1 con el texto "después"
+      → el foco pasa al nuevo bloque
+
+Backspace al inicio de MdBlock N
+  → emite merge_requested
+    → MdEditor concatena el texto de N al final de N-1
+      → N se elimina, el foco vuelve a N-1
 ```
+
+**Conversión Markdown → BBCode:**  
+`MdToBBCode.convert()` es una función estática sin estado. Se llama cada vez que un bloque pierde el foco y pasa a vista previa. Opera línea a línea con expresiones regulares para los elementos inline.
 
 ---
 
 ## Limitaciones conocidas
 
-- `<sup>` / `<sub>` se renderizan con un tamaño de fuente menor pero sin desplazamiento vertical (requiere un `RichTextEffect` personalizado).
-- Las citas anidadas y el resaltado de sintaxis en bloques de código aún no están implementados.
-- El guardado siempre sobreescribe el fichero original; no existe un diálogo «Guardar como».
-- El parser procesa el Markdown completo del bloque en cada pulsación; documentos muy extensos pueden introducir latencia perceptible.
-
----
-
-## Hoja de ruta
-
-| Fase | Funcionalidad | Estado |
-| :--: | :------------ | :----: |
-| 1 | Parser inline (negrita, cursiva, código, enlaces) | ✅ |
-| 2 | Editor por bloques + división/fusión | ✅ |
-| 3 | Múltiples pestañas + arrastrar y soltar | ✅ |
-| 4 | Tablas GFM | ✅ |
-| 5 | Notas al pie | ✅ |
-| 6 | Barra de herramientas con botones de formato | 🔄 En progreso |
-| 7 | `RichTextEffect` para sup/sub y barra de cita | ⏳ Planificado |
-| 8 | Resaltado de sintaxis en bloques de código | ⏳ Planificado |
-| 9 | Guardar como / exportar | ⏳ Planificado |
-| 10 | Soporte IME (CJK / árabe) | ⏳ Planificado |
+- Solo se soportan encabezados hasta H4; H5 y H6 no están implementados. (próxima implementación)
+- Las imágenes (`![alt](url)`) no se renderizan.
+- No hay atajos de formato inline (Ctrl+B, Ctrl+I, etc.) ni barra de herramientas. (próxima implementación)
+- No hay deshacer/rehacer dentro de un bloque más allá del comportamiento nativo de `TextEdit`. (próxima implementación)
+- El guardado sobreescribe siempre el fichero original; no existe «Guardar como». (próxima implementación)
+- La navegación caret al volver de vista previa a edición siempre posiciona al final del bloque.
 
 ---
 
 ## Licencia
 
-_No se ha especificado ninguna licencia. Todos los derechos reservados por defecto hasta que se añada una._
+_No se ha especificado ninguna licencia. Todos los derechos reservados por defecto._
