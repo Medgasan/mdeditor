@@ -164,6 +164,10 @@ static func _parse_list_item(line: String) -> Dictionary:
 		indent += 4 if line[i] == "\t" else 1
 		i += 1
 	var rest := line.substr(i)
+	if rest.begins_with("- [ ] ") or rest.begins_with("- [x] ") or rest.begins_with(" -[X] "):
+		var checked := rest[3] != " "
+		var icon := "☑" if checked else "🔳"
+		return {"is_item": true, "kind": "ul", "indent": indent / 2, "content": icon + " " + rest.substr(6)}
 	if rest.begins_with("- ") or rest.begins_with("* "):
 		return {"is_item": true, "kind": "ul", "indent": indent / 2, "content": rest.substr(2)}
 	var rx := RegEx.new()

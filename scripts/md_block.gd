@@ -17,9 +17,16 @@ func _ready():
 	preview.fit_content = true
 	preview.scroll_active = false
 	preview.selection_enabled = true
-	preview.gui_input.connect(_on_preview_input)
+	#preview.gui_input.connect(_on_preview_input)
 	preview.mouse_entered.connect(_on_mouse_entered)
 	preview.mouse_exited.connect(_on_mouse_exited)
+	preview.gui_input.connect(func(event):
+		if event is InputEventMouseButton and not event.pressed:
+			var sel := preview.get_selected_text()
+			if not sel.is_empty():
+				DisplayServer.clipboard_set(sel)
+				Global.show_toast(self, "Guardado en el portapapeles")
+	)	
 	edit_button.pressed.connect(edit)
 	editor.focus_exited.connect(_to_preview)
 	editor.gui_input.connect(_on_editor_input)
@@ -40,9 +47,9 @@ func get_text() -> String:
 	return editor.text
 
 
-# Pasa al modo edición y enfoca el TextEdit
+## Pasa al modo edición y enfoca el TextEdit
 func focus_editor(at_end: bool = true) -> void:
-	if !Status.editable: return
+	return
 	_to_editor()
 	editor.grab_focus()
 	if at_end:
@@ -91,10 +98,10 @@ func _on_mouse_exited() -> void:
 	edit_button.modulate = Color(1.,1.,1.,0.)
 
 
-func _on_preview_input(e: InputEvent) -> void:
-	if e is InputEventMouseButton and e.pressed and (e as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and Status.editable:
-		accept_event()
-		edit()
+#func _on_preview_input(e: InputEvent) -> void:
+	#if e is InputEventMouseButton and e.pressed and (e as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and Status.editable:
+		#accept_event()
+		#edit()
 
 func edit() -> void:
 	_to_editor()
@@ -113,7 +120,6 @@ func _on_editor_input(e: InputEvent) -> void:
 		return
 
 	# Enter sin shift -> partir bloque
-	print_debug(Input.is_key_pressed(KEY_SHIFT))
 	if (ke.keycode == KEY_ENTER || ke.keycode == KEY_KP_ENTER) and Input.is_key_pressed(KEY_SHIFT):
 		var line := editor.get_caret_line()
 		var col := editor.get_caret_column()
@@ -154,4 +160,3 @@ func _on_editor_input(e: InputEvent) -> void:
 
 func _on_text_changed() -> void:
 	Events.changes_not_saved.emit()
-	Status.changes_saved = false

@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://bn2y24aww1w4e"]
+
+[node name="CenterContainer" type="CenterContainer" unique_id=906330751]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=946343929]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=2062775613]
+layout_mode = 2
+text = "MD Editor"
+horizontal_alignment = 1
+
+[node name="Label2" type="Label" parent="VBoxContainer" unique_id=527434462]
+layout_mode = 2
+text = "Drag & Drop MD Document Here"

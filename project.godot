@@ -21,7 +21,6 @@ boot_splash/image="uid://bpfemxpo1fbmj"
 
 [autoload]
 
-Status="*res://globals/status.gd"
 Events="*res://globals/events.gd"
 Global="*uid://r1568qk4thx0"
 
@@ -29,10 +28,6 @@ Global="*uid://r1568qk4thx0"
 
 window/size/viewport_width=900
 window/size/viewport_height=700
-
-[editor]
-
-run/main_run_args="\"C:\\Users\\franm\\Desktop\\ComandosComunesGit.md\""
 
 [gui]
 

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://brglr8aaukxn3"]
 
 [ext_resource type="Script" uid="uid://d0gjrpiceqhc1" path="res://scripts/main.gd" id="1_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://bn2y24aww1w4e" path="res://empty_mensaje.tscn" id="2_1bvp3"]
 [ext_resource type="FontFile" uid="uid://hwkmpx6fgc6p" path="res://fonts/OpenSans/OpenSans-Regular.ttf" id="4_1bvp3"]
 [ext_resource type="Texture2D" uid="uid://bcq03orsm1v52" path="res://images/save_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" id="4_lquwl"]
 
@@ -13,37 +14,35 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Main" type="MarginContainer" parent="." unique_id=195223992 node_paths=PackedStringArray("check_on_top", "save_texture_button", "tab_container", "margin_container")]
+[node name="Main" type="MarginContainer" parent="." unique_id=195223992 node_paths=PackedStringArray("check_on_top", "save_texture_button", "margin_container")]
 layout_mode = 2
 theme_override_constants/margin_top = 3
 script = ExtResource("1_0xm2m")
-check_on_top = NodePath("../MarginContainer/HBoxContainer/CheckOnTop")
-save_texture_button = NodePath("../MarginContainer/HBoxContainer/CenterContainer/SaveTextureButton")
-tab_container = NodePath("TabContainer")
-margin_container = NodePath("../MarginContainer")
+check_on_top = NodePath("../FooterMarginContainer/HBoxContainer/CheckOnTop")
+save_texture_button = NodePath("../FooterMarginContainer/HBoxContainer/CenterContainer/SaveTextureButton")
+margin_container = NodePath("../FooterMarginContainer")
 
-[node name="TabContainer" type="TabContainer" parent="Main" unique_id=851003234]
+[node name="CenterContainer" parent="Main" unique_id=906330751 instance=ExtResource("2_1bvp3")]
 layout_mode = 2
-drag_to_rearrange_enabled = true
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=312454297]
+[node name="FooterMarginContainer" type="MarginContainer" parent="." unique_id=312454297]
 visible = false
 layout_mode = 2
 size_flags_vertical = 8
 
-[node name="Panel" type="Panel" parent="MarginContainer" unique_id=1611410233]
+[node name="Panel" type="Panel" parent="FooterMarginContainer" unique_id=1611410233]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer" unique_id=1838431328]
+[node name="HBoxContainer" type="HBoxContainer" parent="FooterMarginContainer" unique_id=1838431328]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 
-[node name="CenterContainer" type="CenterContainer" parent="MarginContainer/HBoxContainer" unique_id=2116634519]
+[node name="CenterContainer" type="CenterContainer" parent="FooterMarginContainer/HBoxContainer" unique_id=2116634519]
 layout_mode = 2
 
-[node name="SaveTextureButton" type="TextureButton" parent="MarginContainer/HBoxContainer/CenterContainer" unique_id=353738688]
+[node name="SaveTextureButton" type="TextureButton" parent="FooterMarginContainer/HBoxContainer/CenterContainer" unique_id=353738688]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 8
@@ -55,7 +54,7 @@ texture_disabled = ExtResource("4_lquwl")
 texture_focused = ExtResource("4_lquwl")
 stretch_mode = 0
 
-[node name="CheckOnTop" type="CheckBox" parent="MarginContainer/HBoxContainer" unique_id=189904579]
+[node name="CheckOnTop" type="CheckBox" parent="FooterMarginContainer/HBoxContainer" unique_id=189904579]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0

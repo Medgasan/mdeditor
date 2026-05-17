@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://dfgfe1f0knvro"]
+
+[node name="TabContainer" type="TabContainer" unique_id=1252944393]
+drag_to_rearrange_enabled = true
