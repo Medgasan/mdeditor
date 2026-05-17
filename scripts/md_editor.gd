@@ -2,7 +2,6 @@ class_name MdEditor extends VBoxContainer
 
 const MD_BLOCK := preload("res://md_block.tscn")
 
-
 func _ready() -> void:
 	if get_child_count() == 0:
 		var first := _add_block_at(0, "")

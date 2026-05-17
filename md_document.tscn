@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://b6qxnygjg4v1a"]
+
+[ext_resource type="StyleBox" uid="uid://c3ukknl7p8emt" path="res://styles/main.tres" id="1_hprar"]
+[ext_resource type="Script" uid="uid://lryffdj5av8y" path="res://scripts/md_document.gd" id="1_ovqco"]
+[ext_resource type="Script" uid="uid://s3mkxq120i5u" path="res://scripts/md_editor.gd" id="2_ovqco"]
+
+[node name="ScrollContainer" type="ScrollContainer" unique_id=422489107 node_paths=PackedStringArray("md_editor")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ovqco")
+md_editor = NodePath("MarginContainer/MdEditor")
+
+[node name="MarginContainer" type="PanelContainer" parent="." unique_id=1469120470]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = ExtResource("1_hprar")
+
+[node name="MdEditor" type="VBoxContainer" parent="MarginContainer" unique_id=1559935044]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 20
+script = ExtResource("2_ovqco")

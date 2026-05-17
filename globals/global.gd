@@ -5,7 +5,6 @@ func show_message(text: String):
 	dialog.title = "MD editor/viewer"
 	dialog.dialog_text = text
 	dialog.ok_button_text = "Aceptar"
-	
-	add_child(dialog)
+	get_tree().root.add_child(dialog)
 	dialog.popup_centered()           # Muestra en el centro
 	# dialog.popup()                  # Muestra en posición por defecto
