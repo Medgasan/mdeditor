@@ -29,6 +29,10 @@ Global="*uid://r1568qk4thx0"
 window/size/viewport_width=900
 window/size/viewport_height=700
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/Todo_Manager/plugin.cfg")
+
 [gui]
 
 theme/default_font_multichannel_signed_distance_field=true

@@ -96,7 +96,7 @@ func _insert_at_line(text: String) -> void:
 	editor.end_complex_operation()
 
 
-## Pasa al modo edición y enfoca el TextEdit
+### Pasa al modo edición y enfoca el TextEdit
 func focus_editor(at_end: bool = true) -> void:
 	return
 	_to_editor()

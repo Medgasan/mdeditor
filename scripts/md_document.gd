@@ -7,6 +7,7 @@ class_name MDDocument extends ScrollContainer
 		Events.title_changed.emit()
 	get:
 		return title
+
 @export var documento = ""
 @export var tab_idx = 0
 @export var changed = false
@@ -16,11 +17,36 @@ signal  saved
 var document_tab_default_background_color
 var current_background_tab_color
 
+@export var scroll_speed := 120.0
+@export var smoothness := 5.0
+
+var target_scroll := 0.0
+
+
+
 func _ready() -> void:
+	target_scroll = scroll_vertical
 	Events.connect("changes_not_saved", _changes_not_saved)
 	var style := (get_parent() as TabContainer).get_theme_stylebox("tab_selected") as StyleBoxFlat
 	document_tab_default_background_color = style.bg_color
 	current_background_tab_color = document_tab_default_background_color
+
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			target_scroll -= scroll_speed
+			accept_event()
+
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			target_scroll += scroll_speed
+			accept_event()	
+
+
+func _process(delta):
+	target_scroll = clamp(target_scroll,0,get_v_scroll_bar().max_value)
+	scroll_vertical = lerp(scroll_vertical as float,target_scroll,smoothness * delta)
+
 
 
 func load_document(document : String) -> MDDocument:

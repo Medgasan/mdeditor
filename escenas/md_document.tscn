@@ -12,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_ovqco")
 md_editor = NodePath("MarginContainer/MdEditor")
+smoothness = 3.0
 
 [node name="MarginContainer" type="PanelContainer" parent="." unique_id=1469120470]
 layout_mode = 2

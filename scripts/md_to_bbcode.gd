@@ -51,7 +51,7 @@ static func convert(md: String) -> String:
 
 
 		# Encabezados
-		if l.begins_with("##### "):
+		if l.begins_with("###### "):
 			out_lines.append("[font_size=10][b]%s[/b][/font_size]" % _inline(l.substr(5)))
 			out_lines.append("[hr height=1 width=100% color=#ffffff89]")		
 		if l.begins_with("##### "):
@@ -170,7 +170,7 @@ static func _parse_list_item(line: String) -> Dictionary:
 		indent += 4 if line[i] == "\t" else 1
 		i += 1
 	var rest := line.substr(i)
-	if rest.begins_with("- [ ] ") or rest.begins_with("- [x] ") or rest.begins_with(" -[X] "):
+	if rest.begins_with("- [ ] ") or rest.begins_with("- [x] ") or rest.begins_with("- [X] "):
 		var checked := rest[3] != " "
 		var icon := "☑" if checked else "🔳"
 		return {"is_item": true, "kind": "ul", "indent": indent / 2, "content": icon + " " + rest.substr(6)}

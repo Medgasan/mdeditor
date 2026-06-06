@@ -6,7 +6,7 @@ extends MarginContainer
 @export var load_texture_button: TextureButton 
 @export var new_texture_button: TextureButton 
 @export var tab_container: TabContainer
-@export var margin_container: MarginContainer
+@export var footer: MarginContainer
 @onready var center_container: CenterContainer = $CenterContainer
 
 @export var over_all = false
@@ -31,18 +31,6 @@ func _ready() -> void:
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_on_close_requested)
 	
-	## Dialogos
-	#save_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
-	#save_dialog.filters = PackedStringArray(["*.md ; Markdown"])
-	#add_child(save_dialog)
-	#save_dialog.file_selected.connect(_on_save_as_selected)
-	#
-	#open_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
-	#open_dialog.filters = PackedStringArray(["*.md ; Markdown"])
-	#add_child(open_dialog)
-	#open_dialog.file_selected.connect(_on_open_selected)
-
-
 	# Inicio
 	var arguments = OS.get_cmdline_args()
 	if arguments.size() > 0:
@@ -95,7 +83,12 @@ func create_tab_container()->void:
 func _input(event):
 	if event is InputEventMouseMotion:
 		var hovered := get_viewport().gui_get_hovered_control()
-		margin_container.visible = (hovered == margin_container) || (get_window().size.y - event.global_position.y) < FOOT_ACTIVATE_MARGIN
+		# fixme: solucionar el parpadeo. Tal vez revisar otra forma de aparecer
+		if (hovered == footer) || (get_window().size.y - event.global_position.y) < FOOT_ACTIVATE_MARGIN || !footer.visible:
+			show_footer()
+		else:
+			hide_footer()
+		#footer.visible = (hovered == margin_container) || (get_window().size.y - event.global_position.y) < FOOT_ACTIVATE_MARGIN
 	if not (event is InputEventKey):
 		return
 	var ke := event as InputEventKey
@@ -246,3 +239,19 @@ func _on_save_as_selected(status: bool, paths: PackedStringArray, _filter: int) 
 	current_doc.title = paths[0].get_file().replacen(".md", "").capitalize()
 	current_doc.save()
 	tab_container.set_tab_title(current_doc.tab_idx, current_doc.title)
+	
+	
+	
+func show_footer():
+	footer.visible = true
+	footer.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(footer,"modulate:a",1.0,0.2)	
+
+
+func hide_footer():
+	var tween = create_tween()
+	tween.tween_property(footer,"modulate:a",0.0,0.2)
+	tween.finished.connect(func():
+		footer.visible = false
+	)

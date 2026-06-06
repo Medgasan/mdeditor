@@ -22,6 +22,7 @@ func question_message(text: String, yes_event: Callable, no_event: Callable):
 	dialog.popup_centered()           # Muestra en el centro
 
 
+# fixme: Sale descuadrado 
 func show_toast(parent: Node, msg: String, duration := 2.5) -> void:
 	var label := Label.new()
 	label.text = msg
