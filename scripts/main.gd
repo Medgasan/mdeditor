@@ -2,14 +2,17 @@ extends MarginContainer
 
 @export var check_on_top: CheckBox
 @export var save_texture_button: TextureButton 
+@export var save_as_texture_button: TextureButton 
+@export var load_texture_button: TextureButton 
+@export var new_texture_button: TextureButton 
 @export var tab_container: TabContainer
 @export var margin_container: MarginContainer
 @onready var center_container: CenterContainer = $CenterContainer
 
 @export var over_all = false
 
-const MD_DOCUMENT := preload("res://md_document.tscn")
-const EMPTY_MSG := preload("res://tab_container.tscn")
+const MD_DOCUMENT := preload("res://escenas/md_document.tscn")
+const EMPTY_MSG := preload("res://escenas/tab_container.tscn")
 const FOOT_ACTIVATE_MARGIN := 25
 
 var current_doc: MDDocument
@@ -22,8 +25,23 @@ func _ready() -> void:
 	Events.connect("title_changed",_update_title)
 	check_on_top.connect("toggled",_on_on_top_change)
 	save_texture_button.connect("pressed", _on_save_changes)
+	save_as_texture_button.connect("pressed", _on_save_as_changes)
+	load_texture_button.connect("pressed", load_selected)
+	new_texture_button.connect("pressed", _new_document)
 	get_tree().auto_accept_quit = false
 	get_tree().root.close_requested.connect(_on_close_requested)
+	
+	## Dialogos
+	#save_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	#save_dialog.filters = PackedStringArray(["*.md ; Markdown"])
+	#add_child(save_dialog)
+	#save_dialog.file_selected.connect(_on_save_as_selected)
+	#
+	#open_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	#open_dialog.filters = PackedStringArray(["*.md ; Markdown"])
+	#add_child(open_dialog)
+	#open_dialog.file_selected.connect(_on_open_selected)
+
 
 	# Inicio
 	var arguments = OS.get_cmdline_args()
@@ -33,7 +51,7 @@ func _ready() -> void:
 	get_window().files_dropped.connect(_on_files_dropped)
 	
 	# Valores de prueba
-	if OS.is_debug_build():	
+	if OS.is_debug_build():
 		load_md("C:\\Users\\franm\\Desktop\\ComandosComunesGit.md")
 		load_md("C:\\Users\\franm\\Desktop\\GDD_Starship_Disaster_v4.md")
 
@@ -78,6 +96,22 @@ func _input(event):
 	if event is InputEventMouseMotion:
 		var hovered := get_viewport().gui_get_hovered_control()
 		margin_container.visible = (hovered == margin_container) || (get_window().size.y - event.global_position.y) < FOOT_ACTIVATE_MARGIN
+	if not (event is InputEventKey):
+		return
+	var ke := event as InputEventKey
+
+	if not ke.pressed or not ke.ctrl_pressed: 
+		return
+	match ke.keycode:
+		KEY_S:
+			get_viewport().set_input_as_handled()
+			_on_save_as_changes()
+		KEY_N:
+			get_viewport().set_input_as_handled()
+			_new_document()
+		KEY_O:
+			load_selected()
+
 
 
 func _on_close_requested() -> void:
@@ -94,12 +128,13 @@ func _on_windows_status_change() -> void:
 
 
 func _on_changes_not_saved() -> void:
-	save_texture_button.visible = true
+	pass
+	#save_texture_button.visible = true
 
 
 func _on_save_changes() -> void:
 	current_doc.save()
-	save_texture_button.visible = false
+	#save_texture_button.visible = false
 
 
 func _on_tab_selected(idx) -> void:
@@ -107,7 +142,7 @@ func _on_tab_selected(idx) -> void:
 		get_window().title = "Markdown Editor"
 		return
 	current_doc = tab_container.get_current_tab_control() as MDDocument
-	save_texture_button.visible = current_doc.changed
+	#save_texture_button.visible = current_doc.changed
 	get_window().title = current_doc.title
 
 
@@ -116,10 +151,14 @@ func _on_tab_close_pressed(index: int) -> void:
 	_check_unsaved(doc, func(): doc.queue_free())
 	await doc.tree_exited
 	if (tab_container.get_tab_count() < 1):
+		current_doc = null
 		tab_container.queue_free()
+	else:
+		current_doc = tab_container.get_current_tab_control() as MDDocument
 
 
 func _check_unsaved_and_quit() -> void:
+	if tab_container == null: return
 	for doc in tab_container.get_children():
 		if (doc as MDDocument).changed:
 			_check_unsaved(doc, func(): get_tree().quit())
@@ -143,4 +182,67 @@ func _check_unsaved(doc: MDDocument, on_done: Callable) -> void:
 
 func _update_title():
 	get_window().title = current_doc.title
+	tab_container.set_tab_title(current_doc.tab_idx, current_doc.title)
+
+
+func _on_save_as_changes():
+	_save_as_dialog()
+
+
+func _new_document() -> void:
+	if tab_container == null:
+		create_tab_container()
+	var new_doc: MDDocument = MD_DOCUMENT.instantiate()
+	tab_container.add_child(new_doc)
+	new_doc.tab_idx = tab_container.get_tab_count() - 1
+	new_doc.title = "Sin título"
+	tab_container.set_tab_title(new_doc.tab_idx, new_doc.title)
+	tab_container.current_tab = new_doc.tab_idx
+	current_doc = new_doc
+	current_doc.title = "new document"
+
+
+func load_selected():
+	get_viewport().set_input_as_handled()
+	_open_file_dialog()
+
+
+func _open_file_dialog() -> void:
+	DisplayServer.file_dialog_show(
+		"Abrir documento",       # título
+		"",                      # directorio inicial
+		"",                      # nombre de archivo inicial
+		false,                   # modo guardar (false = abrir)
+		DisplayServer.FILE_DIALOG_MODE_OPEN_FILE,
+		["*.md ; Markdown"],     # filtros
+		_on_open_selected        # callback
+	)
+
+
+func _on_open_selected(status: bool, paths: PackedStringArray, _filter: int) -> void:
+	if not status or paths.is_empty():
+		return
+	load_md(paths[0])
+
+
+func _save_as_dialog() -> void:
+	DisplayServer.file_dialog_show(
+		"Guardar como",
+		"",
+		"sin_titulo.md",
+		false,
+		DisplayServer.FILE_DIALOG_MODE_SAVE_FILE,
+		["*.md ; Markdown"],
+		_on_save_as_selected
+	)
+
+
+func _on_save_as_selected(status: bool, paths: PackedStringArray, _filter: int) -> void:
+	if not status or paths.is_empty():
+		return
+	if not is_instance_valid(current_doc):
+		return
+	current_doc.documento = paths[0]
+	current_doc.title = paths[0].get_file().replacen(".md", "").capitalize()
+	current_doc.save()
 	tab_container.set_tab_title(current_doc.tab_idx, current_doc.title)

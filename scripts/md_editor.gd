@@ -1,7 +1,7 @@
 class_name MdEditor extends VBoxContainer
 
-const MD_BLOCK := preload("res://md_block.tscn")
-
+const MD_BLOCK := preload("res://escenas/md_block.tscn")
+var _undo_redo := UndoRedo.new()
 
 func _ready() -> void:
 	if get_child_count() == 0:
@@ -63,12 +63,47 @@ func _split_regex(rx: RegEx, s: String) -> PackedStringArray:
 	return out
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey):
+		return
+	var ke := event as InputEventKey
+	if not ke.pressed or not ke.ctrl_pressed:
+		return
+	if not is_visible_in_tree():
+		return
+	if ke.ctrl_pressed and ke.keycode == KEY_Z:
+		accept_event()                  # evita que el evento suba
+		if ke.shift_pressed:
+			_undo_redo.redo()               # Ctrl+Shift+Z → rehacer
+		else:
+			_undo_redo.undo()               # Ctrl+Z        → deshacer
+		return
+
+
 # ---- Handlers ----
-func _on_split(before: String, after: String, source: MdBlock) -> void:
-	var idx := source.get_index()
-	source.set_text(before)
+func _on_split(before, after, source) -> void:
+	_undo_redo.create_action("Split block")
+	_undo_redo.add_do_method(_do_split.bind(source.get_index(), before, after))
+	_undo_redo.add_undo_method(_undo_split.bind(source.get_index(), before + after))
+	_undo_redo.commit_action()
+
+
+func _do_split(idx: int, before: String, after: String) -> void:
+	var block := get_child(idx) as MdBlock
+	if block == null:
+		return
+	block.set_text(before)
 	var new_block := _add_block_at(idx + 1, after)
 	new_block.call_deferred("focus_editor", false)
+
+
+func _undo_split(idx: int, original_text: String) -> void:
+	if idx + 1 < get_child_count():
+		get_child(idx + 1).queue_free()
+	var block := get_child(idx) as MdBlock
+	if block:
+		block.set_text(original_text)
+		block.call_deferred("focus_editor")
 
 
 func _on_merge(source: MdBlock) -> void:
@@ -79,11 +114,32 @@ func _on_merge(source: MdBlock) -> void:
 	if prev == null:
 		return
 	var prev_text := prev.get_text()
-	var combined := prev_text + source.get_text()
+	var src_text  := source.get_text()
+	_undo_redo.create_action("Merge blocks")
+	_undo_redo.add_do_method(_do_merge.bind(idx - 1, prev_text, src_text))
+	_undo_redo.add_undo_method(_undo_merge.bind(idx - 1, prev_text, src_text))
+	_undo_redo.commit_action()
+
+
+func _do_merge(prev_idx: int, prev_text: String, src_text: String) -> void:
+	var prev := get_child(prev_idx) as MdBlock
+	if prev == null:
+		return
+	var combined := prev_text + src_text
 	var lc := _offset_to_line_col(combined, prev_text.length())
 	prev.set_text(combined)
-	source.queue_free()
+	if prev_idx + 1 < get_child_count():
+		get_child(prev_idx + 1).queue_free()
 	prev.call_deferred("focus_editor_at", lc.x, lc.y)
+
+
+func _undo_merge(prev_idx: int, prev_text: String, src_text: String) -> void:
+	var prev := get_child(prev_idx) as MdBlock
+	if prev == null:
+		return
+	prev.set_text(prev_text)
+	var restored := _add_block_at(prev_idx + 1, src_text)
+	restored.call_deferred("focus_editor", false)
 
 
 func _on_focus_prev(source: MdBlock) -> void:

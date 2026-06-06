@@ -9,10 +9,12 @@ signal focus_next_requested
 @onready var editor: TextEdit = $TextEdit
 @onready var preview: RichTextLabel = $RichTextLabel
 @onready var edit_button: TextureButton = $RichTextLabel/EditButton
+@onready var bar := HBoxContainer.new()
 
 var tween : Tween
 
 func _ready():
+	_build_toolbar()
 	preview.bbcode_enabled = true
 	preview.fit_content = true
 	preview.scroll_active = false
@@ -32,6 +34,7 @@ func _ready():
 	editor.gui_input.connect(_on_editor_input)
 	editor.text_changed.connect(_on_text_changed)
 	preview.fit_content = true
+	preview.meta_clicked.connect(_on_meta_clicked)
 	_to_preview()
 
 
@@ -45,6 +48,52 @@ func set_text(md: String) -> void:
 
 func get_text() -> String:
 	return editor.text
+
+
+func _build_toolbar() -> void:
+	bar.name = "Toolbar"
+	bar.hide()
+	add_child(bar)
+	move_child(bar, 0)  # encima del TextEdit
+
+	_add_tool_button(bar, "B",  func(): _wrap_selection("**", "**"))
+	_add_tool_button(bar, "I",  func(): _wrap_selection("*",  "*"))
+	_add_tool_button(bar, "~~", func(): _wrap_selection("~~", "~~"))
+	_add_tool_button(bar, "</>",func(): _wrap_selection("`",  "`"))
+	_add_tool_button(bar, "🔗", func(): _wrap_selection("[",  "](url)"))
+	_add_tool_button(bar, "H1", func(): _prefix_line("# "))
+	_add_tool_button(bar, "H2", func(): _prefix_line("## "))
+	_add_tool_button(bar, "H3", func(): _prefix_line("### "))
+	_add_tool_button(bar, "—",  func(): _insert_at_line("---"))
+
+
+func _add_tool_button(parent: HBoxContainer, label: String, action: Callable) -> void:
+	var btn := Button.new()
+	btn.text = label
+	btn.flat = true
+	btn.focus_mode = Control.FOCUS_NONE  # no roba el foco del TextEdit
+	btn.pressed.connect(func():
+		editor.grab_focus()
+		action.call()
+	)
+	parent.add_child(btn)
+
+
+func _prefix_line(prefix: String) -> void:
+	editor.begin_complex_operation()
+	var line := editor.get_caret_line()
+	var current := editor.get_line(line)
+	if current.begins_with(prefix):
+		editor.set_line(line, current.substr(prefix.length()))
+	else:
+		editor.set_line(line, prefix + current)
+	editor.end_complex_operation()
+
+
+func _insert_at_line(text: String) -> void:
+	editor.begin_complex_operation()
+	editor.insert_line_at(editor.get_caret_line(), text)
+	editor.end_complex_operation()
 
 
 ## Pasa al modo edición y enfoca el TextEdit
@@ -74,6 +123,7 @@ func focus_editor_at(line: int, col: int) -> void:
 func _to_editor() -> void:
 	editor.show()
 	preview.hide()
+	bar.show()
 
 
 func _to_preview() -> void:
@@ -85,6 +135,7 @@ func _to_preview() -> void:
 	preview.text = MdToBBCode.convert(editor.text)
 	editor.hide()
 	preview.show()
+	bar.hide()
 
 
 func _on_mouse_entered() -> void:
@@ -113,14 +164,42 @@ func edit() -> void:
 
 
 func _on_editor_input(e: InputEvent) -> void:
-	if not (e is InputEventKey):
-		return
+	if not (e is InputEventKey): return
 	var ke := e as InputEventKey
-	if not ke.pressed:
+	if not ke.pressed: return
+	# --- UNDO / REDO ---
+	if ke.ctrl_pressed and ke.keycode == KEY_Z:
+		print_debug("Ctrl+z presionado en el editor")
+		accept_event()                  # evita que el evento suba
+		if ke.shift_pressed:
+			editor.redo()               # Ctrl+Shift+Z → rehacer
+		else:
+			editor.undo()               # Ctrl+Z        → deshacer
 		return
 
+	if ke.ctrl_pressed: 
+		# Ctrl+B → **negrita**
+		if ke.keycode == KEY_B:
+			accept_event()
+			_wrap_selection("**", "**")
+			return
+		# Ctrl+I → *cursiva*
+		elif ke.keycode == KEY_I:
+			accept_event()
+			_wrap_selection("*", "*")
+			return
+		# Ctrl+K → [texto](url)
+		elif ke.keycode == KEY_K:
+			accept_event()
+			_wrap_selection("[", "](url)")
+			return
+		# Ctrl+` → `código`
+		elif ke.keycode == KEY_QUOTELEFT:
+			accept_event()
+			_wrap_selection("`", "`")
+			return
 	# Enter sin shift -> partir bloque
-	if (ke.keycode == KEY_ENTER || ke.keycode == KEY_KP_ENTER) and Input.is_key_pressed(KEY_SHIFT):
+	elif (ke.keycode == KEY_ENTER || ke.keycode == KEY_KP_ENTER) and Input.is_key_pressed(KEY_SHIFT):
 		var line := editor.get_caret_line()
 		var col := editor.get_caret_column()
 		var lines := editor.text.split("\n")
@@ -139,20 +218,18 @@ func _on_editor_input(e: InputEvent) -> void:
 		accept_event()
 		split_requested.emit(before, after)
 		return
-
 	# Backspace al inicio absoluto -> fundir con el bloque anterior
-	if ke.keycode == KEY_BACKSPACE:
+	elif ke.keycode == KEY_BACKSPACE:
 		if editor.get_caret_line() == 0 and editor.get_caret_column() == 0 and not editor.has_selection():
 			accept_event()
 			merge_requested.emit()
 			return
-
 	# Flechas arriba/abajo en borde del bloque -> saltar bloque
-	if ke.keycode == KEY_UP and editor.get_caret_line() == 0:
+	elif ke.keycode == KEY_UP and editor.get_caret_line() == 0:
 		accept_event()
 		focus_prev_requested.emit()
 		return
-	if ke.keycode == KEY_DOWN and editor.get_caret_line() == editor.get_line_count() - 1:
+	elif ke.keycode == KEY_DOWN and editor.get_caret_line() == editor.get_line_count() - 1:
 		accept_event()
 		focus_next_requested.emit()
 		return
@@ -160,3 +237,23 @@ func _on_editor_input(e: InputEvent) -> void:
 
 func _on_text_changed() -> void:
 	Events.changes_not_saved.emit()
+
+
+func _on_meta_clicked(meta: Variant) -> void:
+	OS.shell_open(str(meta))	
+
+
+func _wrap_selection(prefix: String, suffix: String) -> void:
+	editor.begin_complex_operation()
+	if editor.has_selection():
+		var sel := editor.get_selected_text()
+		var from_line := editor.get_selection_from_line()
+		var from_col  := editor.get_selection_from_column()
+		editor.delete_selection()
+		editor.insert_text_at_caret(prefix + sel + suffix)
+		editor.set_caret_line(from_line)
+		editor.set_caret_column(from_col + prefix.length())
+	else:
+		editor.insert_text_at_caret(prefix + suffix)
+		editor.set_caret_column(editor.get_caret_column() - suffix.length())
+	editor.end_complex_operation()

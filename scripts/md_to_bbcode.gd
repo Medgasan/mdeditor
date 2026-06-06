@@ -51,6 +51,12 @@ static func convert(md: String) -> String:
 
 
 		# Encabezados
+		if l.begins_with("##### "):
+			out_lines.append("[font_size=10][b]%s[/b][/font_size]" % _inline(l.substr(5)))
+			out_lines.append("[hr height=1 width=100% color=#ffffff89]")		
+		if l.begins_with("##### "):
+			out_lines.append("[font_size=12][b]%s[/b][/font_size]" % _inline(l.substr(5)))
+			out_lines.append("[hr height=1 width=100% color=#ffffff89]")		
 		if l.begins_with("#### "):
 			out_lines.append("[font_size=16][b]%s[/b][/font_size]" % _inline(l.substr(5)))
 			out_lines.append("[hr height=1 width=100% color=#ffffff89]")

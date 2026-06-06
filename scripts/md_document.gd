@@ -33,6 +33,7 @@ func load_document(document : String) -> MDDocument:
 
 
 func save() -> void:
+	if documento.is_empty(): return;
 	Global.save_document(documento, md_editor.get_markdown())
 	changed = false
 	title = title.replace("*", "")
