@@ -20,6 +20,23 @@ Cada bloque lógico (separado por línea en blanco) es un nodo independiente con
 | Fusionar con el bloque anterior | `Backspace` al inicio del bloque |
 | Moverse al bloque anterior | `↑` en la primera línea |
 | Moverse al bloque siguiente | `↓` en la última línea |
+| Deshacer | `Ctrl + Z` |
+| Rehacer | `Ctrl + Shift + Z` / `Ctrl + Y` |
+| Negrita | `Ctrl + B` |
+| Cursiva | `Ctrl + I` |
+| Enlace | `Ctrl + K` |
+| Código inline | `Ctrl + `` ` |
+| Nuevo documento | `Ctrl + N` |
+| Abrir documento | `Ctrl + O` |
+| Guardar | `Ctrl + S` |
+| Guardar como | `Ctrl + Shift + S` |
+
+### Barra de herramientas
+Visible únicamente en modo edición. Botones: **B**, *I*, ~~tachado~~, `</>`, 🔗, H1, H2, H3, `—`.
+
+### Deshacer / Rehacer
+- **Dentro de un bloque** — historial nativo de `TextEdit`, incluyendo operaciones de la barra de herramientas agrupadas con `begin_complex_operation`.
+- **Estructural** (split/merge) — `UndoRedo` en `MdEditor`.
 
 ### Selección y portapapeles
 Al soltar el botón del ratón sobre texto seleccionado en la vista previa, el texto se copia automáticamente al portapapeles con confirmación toast.
@@ -67,6 +84,9 @@ Al soltar el botón del ratón sobre texto seleccionado en la vista previa, el t
 | Tachado | `~~texto~~` |
 | Código inline | `` `código` `` |
 | Enlace | `[etiqueta](url)` |
+| Imagen | `![alt](ruta)` |
+
+> Las imágenes se renderizan con `[img]` de BBCode. Solo se soportan rutas locales (`res://`, `user://`, rutas absolutas); URLs remotas requieren descarga previa.
 
 ---
 
@@ -97,13 +117,19 @@ godot --path /ruta/al/proyecto -- /ruta/al/fichero.md
 # Por arrastrar y soltar
 Arrastra cualquier fichero .md sobre la ventana.
 
+# Desde el menú
+Ctrl+O abre el diálogo nativo del sistema operativo.
+
 # Sin fichero
 El editor arranca con una pestaña vacía lista para escribir.
 ```
 
 ### Guardar
 
-El documento se guarda en su ruta original (sobreescribe el fichero). Se puede guardar desde el botón de la barra inferior o desde el diálogo al cerrar una pestaña con cambios pendientes.
+- `Ctrl+S` — guarda en la ruta original (sobreescribe).
+- `Ctrl+Shift+S` — abre diálogo nativo para elegir ruta y nombre.
+- Botón en la barra inferior cuando hay cambios pendientes.
+- Al cerrar una pestaña con cambios, pregunta si guardar.
 
 ---
 
@@ -119,8 +145,8 @@ El documento se guarda en su ruta original (sobreescribe el fichero). Se puede g
 ├── scripts/
 │   ├── main.gd                # Ventana, pestañas, drag & drop, CLI
 │   ├── md_document.gd         # Carga/guardado, título, estado de cambios
-│   ├── md_editor.gd           # Orquestación de bloques, split/merge
-│   ├── md_block.gd            # Modo edición/previa, eventos de teclado
+│   ├── md_editor.gd           # Orquestación de bloques, split/merge, undo estructural
+│   ├── md_block.gd            # Modo edición/previa, toolbar, atajos inline
 │   └── md_to_bbcode.gd        # Parser Markdown → BBCode (clase estática)
 ├── globals/
 │   ├── events.gd              # Bus de señales global
@@ -140,6 +166,7 @@ El documento se guarda en su ruta original (sobreescribe el fichero). Se puede g
 MDDocument  (ScrollContainer)
   └── MdEditor  (VBoxContainer)
         ├── MdBlock           ← bloque 1
+        │     ├── HBoxContainer ← barra de herramientas (solo en edición)
         │     ├── TextEdit    ← edición en Markdown bruto
         │     └── RichTextLabel ← vista previa BBCode
         ├── MdBlock           ← bloque 2
@@ -151,12 +178,12 @@ MDDocument  (ScrollContainer)
 ```
 Shift+Enter en MdBlock N
   → emite split_requested(antes, después)
-    → MdEditor crea MdBlock N+1 con el texto "después"
+    → MdEditor registra en UndoRedo y crea MdBlock N+1
       → el foco pasa al nuevo bloque
 
 Backspace al inicio de MdBlock N
   → emite merge_requested
-    → MdEditor concatena el texto de N al final de N-1
+    → MdEditor registra en UndoRedo y concatena N al final de N-1
       → N se elimina, el foco vuelve a N-1
 ```
 
@@ -167,12 +194,9 @@ Backspace al inicio de MdBlock N
 
 ## Limitaciones conocidas
 
-- Solo se soportan encabezados hasta H4; H5 y H6 no están implementados. (próxima implementación)
-- Las imágenes (`![alt](url)`) no se renderizan.
-- No hay atajos de formato inline (Ctrl+B, Ctrl+I, etc.) ni barra de herramientas. (próxima implementación)
-- No hay deshacer/rehacer dentro de un bloque más allá del comportamiento nativo de `TextEdit`. (próxima implementación)
-- El guardado sobreescribe siempre el fichero original; no existe «Guardar como». (próxima implementación)
+- Las imágenes remotas (`https://`) no se renderizan; solo rutas locales.
 - La navegación caret al volver de vista previa a edición siempre posiciona al final del bloque.
+- El historial de undo estructural (split/merge) y el de texto son independientes y no están coordinados.
 
 ---
 
