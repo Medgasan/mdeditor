@@ -1,15 +1,7 @@
-<div align="center">
-
-# MdBlockEditor
-
-**Editor y visor de Markdown por bloques, construido con Godot 4.6**
-
 [![Godot](https://img.shields.io/badge/Godot-4.6-478cbf?style=flat-square&logo=godotengine&logoColor=white)](https://godotengine.org)
 [![GDScript](https://img.shields.io/badge/Lenguaje-GDScript%20100%25-355570?style=flat-square)](https://github.com/Medgasan/mdeditor)
 [![Dependencias](https://img.shields.io/badge/Dependencias-ninguna-6fc9b0?style=flat-square)](#requisitos)
 [![Licencia](https://img.shields.io/badge/Licencia-no%20especificada-ff8f66?style=flat-square)](#licencia)
-
-</div>
 
 ---
 
@@ -166,7 +158,7 @@ godot --path /ruta/al/proyecto -- /ruta/al/fichero.md
 
 ## Estructura del proyecto
 
-<details>
+<details markdown="1">
 <summary>Ver árbol de archivos</summary>
 
 ```
@@ -196,7 +188,7 @@ godot --path /ruta/al/proyecto -- /ruta/al/fichero.md
 
 ## Arquitectura
 
-<details>
+<details markdown="1">
 <summary>Ver diagramas</summary>
 
 ```
@@ -240,8 +232,4 @@ Backspace al inicio de MdBlock N
 
 ---
 
-<div align="center">
-
 [Repositorio](https://github.com/Medgasan/mdeditor) · Construido con Godot 4.6
-
-</div>
